@@ -1,0 +1,20 @@
+{
+  "name": "store-financial-management",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:api": "npm run dev -w @sfm/api",
+    "dev:web": "npm run dev -w @sfm/web",
+    "lint": "npm run lint --workspaces",
+    "format": "prettier --write .",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}

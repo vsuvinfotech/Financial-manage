@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  permissions String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+
+  @@map("roles")
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+}
+
+enum RevenueCategory {
+  TOBACCO
+  GROCERY
+  NON_TAXABLE
+  FOOD_STAMP
+  LIQUOR
+  WINE
+  NON_ALCOHOLIC
+}
+
+enum ExpenseType {
+  UTILITY
+  STORE_EXPENSE
+  ATM_COMMISSION
+  BAR_COMMISSION
+  MISC_EXPENSE
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  roleId    String
+  role      Role       @relation(fields: [roleId], references: [id])
+  updatedAt DateTime   @updatedAt
+  createdAt DateTime   @default(now())
+  revenues  Revenue[]
+  expenses  Expense[]
+  purchases Purchase[]
+
+  @@map("users")
+}
+
+model Revenue {
+  id            String          @id @default(cuid())
+  category      RevenueCategory
+  amount        Decimal         @db.Decimal(12, 2)
+  paymentMethod PaymentMethod
+  notes         String?
+  date          DateTime
+  createdBy     String
+  createdAt     DateTime        @default(now())
+  creator       User            @relation(fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@map("revenues")
+}
+
+model Expense {
+  id            String        @id @default(cuid())
+  expenseType   ExpenseType
+  amount        Decimal       @db.Decimal(12, 2)
+  paymentMethod PaymentMethod
+  notes         String?
+  date          DateTime
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  creator       User          @relation(fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@map("expenses")
+}
+
+model Purchase {
+  id            String        @id @default(cuid())
+  vendorName    String
+  category      String
+  amount        Decimal       @db.Decimal(12, 2)
+  paymentMethod PaymentMethod
+  notes         String?
+  date          DateTime
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  creator       User          @relation(fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@map("purchases")
+}
+
+model DailyClosing {
+  id             String   @id @default(cuid())
+  date           DateTime @unique
+  totalRevenue   Decimal  @db.Decimal(12, 2)
+  totalExpense   Decimal  @db.Decimal(12, 2)
+  totalPurchase  Decimal  @db.Decimal(12, 2)
+  cashTotal      Decimal  @db.Decimal(12, 2)
+  cardTotal      Decimal  @db.Decimal(12, 2)
+  netProfit      Decimal  @db.Decimal(12, 2)
+  createdAt      DateTime @default(now())
+
+  @@map("daily_closing")
+}
