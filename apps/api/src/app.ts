@@ -10,9 +10,20 @@ import { apiRoutes } from "./routes/index.js";
 export const app = express();
 
 app.use(helmet());
+const allowedOrigins = [
+  env.CLIENT_URL,
+  "http://localhost:3000",
+  "http://localhost:3001",
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: [env.CLIENT_URL || "http://localhost:3000", "http://localhost:3001", "http://localhost:3000"],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     credentials: true,
   }),
 );

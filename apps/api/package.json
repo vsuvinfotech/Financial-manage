@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "vercel-build": "prisma generate && prisma migrate deploy && tsc",
     "start": "node dist/server.js",
+    "postinstall": "prisma generate",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
