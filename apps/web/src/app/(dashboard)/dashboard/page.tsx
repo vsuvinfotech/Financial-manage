@@ -37,29 +37,33 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Financial Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Revenue, expenses, purchases, and closing balances.</p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 p-6 text-white shadow-xl">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-black/10 blur-3xl" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight drop-shadow-sm">Financial Dashboard</h1>
+            <p className="mt-1 text-sm text-white/80">Revenue, expenses, purchases, and closing balances at a glance.</p>
+          </div>
+          <Select value={filter} onValueChange={(val: any) => setFilter(val)}>
+            <SelectTrigger className="w-[200px] border-white/30 bg-white/15 text-white backdrop-blur hover:bg-white/25 focus:ring-white/40">
+              <SelectValue placeholder="Select filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="daily">Today (Daily)</SelectItem>
+              <SelectItem value="weekly">Last 7 Days (Weekly)</SelectItem>
+              <SelectItem value="monthly">This Month (Monthly)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={filter} onValueChange={(val: any) => setFilter(val)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select filter" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="daily">Today (Daily)</SelectItem>
-            <SelectItem value="weekly">Last 7 Days (Weekly)</SelectItem>
-            <SelectItem value="monthly">This Month (Monthly)</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-        <SummaryCard title="Revenue" value={data.totalRevenue} icon={TrendingUp} />
-        <SummaryCard title="Expenses" value={data.totalExpenses} icon={Receipt} />
-        <SummaryCard title="Purchases" value={data.totalPurchases} icon={ShoppingBag} />
-        <SummaryCard title="Cash Balance" value={data.cashTotal} icon={Banknote} />
-        <SummaryCard title="Card Balance" value={data.cardTotal} icon={CreditCard} />
-        <SummaryCard title="Net Profit" value={data.netProfit} icon={WalletCards} />
+        <SummaryCard title="Revenue" value={data.totalRevenue} icon={TrendingUp} accent="emerald" />
+        <SummaryCard title="Expenses" value={data.totalExpenses} icon={Receipt} accent="rose" />
+        <SummaryCard title="Purchases" value={data.totalPurchases} icon={ShoppingBag} accent="amber" />
+        <SummaryCard title="Cash Balance" value={data.cashTotal} icon={Banknote} accent="sky" />
+        <SummaryCard title="Card Balance" value={data.cardTotal} icon={CreditCard} accent="violet" />
+        <SummaryCard title="Net Profit" value={data.netProfit} icon={WalletCards} accent="indigo" />
       </div>
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <RevenueExpenseChart data={chart.data ?? []} />

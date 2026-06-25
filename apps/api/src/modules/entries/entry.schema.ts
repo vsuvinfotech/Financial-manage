@@ -1,22 +1,7 @@
 import { z } from "zod";
 
 export const paymentMethodSchema = z.enum(["CASH", "CARD"]);
-export const revenueCategorySchema = z.enum([
-  "TOBACCO",
-  "GROCERY",
-  "NON_TAXABLE",
-  "FOOD_STAMP",
-  "LIQUOR",
-  "WINE",
-  "NON_ALCOHOLIC",
-]);
-export const expenseTypeSchema = z.enum([
-  "UTILITY",
-  "STORE_EXPENSE",
-  "ATM_COMMISSION",
-  "BAR_COMMISSION",
-  "MISC_EXPENSE",
-]);
+export const categoryNameSchema = z.string().min(1).max(60);
 
 export const listQuerySchema = z.object({
   query: z.object({
@@ -40,7 +25,7 @@ const entryBase = {
 export const revenueCreateSchema = z.object({
   body: z.object({
     ...entryBase,
-    category: revenueCategorySchema,
+    category: categoryNameSchema,
   }),
 });
 export const revenueUpdateSchema = z.object({
@@ -50,7 +35,7 @@ export const revenueUpdateSchema = z.object({
 export const expenseCreateSchema = z.object({
   body: z.object({
     ...entryBase,
-    expenseType: expenseTypeSchema,
+    expenseType: categoryNameSchema,
   }),
 });
 export const expenseUpdateSchema = z.object({
@@ -61,7 +46,7 @@ export const purchaseCreateSchema = z.object({
   body: z.object({
     ...entryBase,
     vendorName: z.string().min(2),
-    category: z.string().min(2),
+    category: categoryNameSchema,
   }),
 });
 export const purchaseUpdateSchema = z.object({

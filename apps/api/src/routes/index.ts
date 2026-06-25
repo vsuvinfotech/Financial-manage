@@ -6,12 +6,14 @@ import { expenseRoutes, purchaseRoutes, revenueRoutes } from "../modules/entries
 import { reportRoutes } from "../modules/reports/reports.routes.js";
 import { userRoutes } from "../modules/users/users.routes.js";
 import { rolesRoutes } from "../modules/roles/roles.routes.js";
+import { categoriesRoutes } from "../modules/categories/categories.routes.js";
 
 export const apiRoutes = Router();
 
 apiRoutes.use("/auth", authRoutes);
 apiRoutes.use("/users", userRoutes);
 apiRoutes.use("/roles", rolesRoutes);
+apiRoutes.use("/categories", categoriesRoutes);
 apiRoutes.use("/revenues", revenueRoutes);
 apiRoutes.use("/expenses", expenseRoutes);
 apiRoutes.use("/purchases", purchaseRoutes);

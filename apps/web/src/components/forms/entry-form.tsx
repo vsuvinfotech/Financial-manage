@@ -20,7 +20,7 @@ const schema = z.object({
 
 export type EntryFormValues = z.infer<typeof schema>;
 
-export function EntryForm({ primaryLabel, secondaryLabel, primaryOptions, onSubmit }: { primaryLabel: string; secondaryLabel?: string; primaryOptions?: readonly string[]; onSubmit: (values: EntryFormValues) => Promise<void> }) {
+export function EntryForm({ primaryLabel, secondaryLabel, primaryOptions, secondaryOptions, onSubmit }: { primaryLabel: string; secondaryLabel?: string; primaryOptions?: readonly string[]; secondaryOptions?: readonly string[]; onSubmit: (values: EntryFormValues) => Promise<void> }) {
   const form = useForm<EntryFormValues>({
     resolver: zodResolver(schema),
     defaultValues: { paymentMethod: "CASH", date: new Date().toISOString().slice(0, 10) },
@@ -36,7 +36,17 @@ export function EntryForm({ primaryLabel, secondaryLabel, primaryOptions, onSubm
           </Select>
         ) : <Input {...form.register("primary")} />}
       </div>
-      {secondaryLabel && <div className="space-y-2"><Label>{secondaryLabel}</Label><Input {...form.register("secondary")} /></div>}
+      {secondaryLabel && (
+        <div className="space-y-2">
+          <Label>{secondaryLabel}</Label>
+          {secondaryOptions ? (
+            <Select onValueChange={(value) => form.setValue("secondary", value)}>
+              <SelectTrigger><SelectValue placeholder={secondaryLabel} /></SelectTrigger>
+              <SelectContent>{secondaryOptions.map((item) => <SelectItem key={item} value={item}>{item.replaceAll("_", " ")}</SelectItem>)}</SelectContent>
+            </Select>
+          ) : <Input {...form.register("secondary")} />}
+        </div>
+      )}
       <div className="space-y-2"><Label>Amount</Label><Input type="number" step="0.01" {...form.register("amount")} /></div>
       <div className="space-y-2">
         <Label>Payment Method</Label>

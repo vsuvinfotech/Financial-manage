@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shield, BarChart3, ClipboardCheck, Home, Receipt, ShoppingBag, Users, WalletCards } from "lucide-react";
+import { Shield, BarChart3, ClipboardCheck, Home, Receipt, ShoppingBag, Tags, Users, WalletCards } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -15,6 +15,7 @@ const items = [
   { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/users", label: "Users", icon: Users, permission: "users:read" },
   { href: "/roles", label: "Roles", icon: Shield, permission: "roles:read" },
+  { href: "/categories", label: "Categories", icon: Tags, permission: "categories:read" },
 ];
 
 export function Sidebar() {

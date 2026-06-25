@@ -7,12 +7,13 @@ import { EntryForm, EntryFormValues } from "@/components/forms/entry-form";
 import { EntryTable } from "@/components/tables/entry-table";
 import { api } from "@/lib/api";
 
-export function EntryPage({ title, endpoint, primaryLabel, primaryOptions, secondaryLabel, columns, mapValues }: {
+export function EntryPage({ title, endpoint, primaryLabel, primaryOptions, secondaryLabel, secondaryOptions, columns, mapValues }: {
   title: string;
   endpoint: string;
   primaryLabel: string;
   primaryOptions?: readonly string[];
   secondaryLabel?: string;
+  secondaryOptions?: readonly string[];
   columns: Array<{ key: string; label: string }>;
   mapValues: (values: EntryFormValues) => Record<string, unknown>;
 }) {
@@ -30,7 +31,7 @@ export function EntryPage({ title, endpoint, primaryLabel, primaryOptions, secon
       </div>
       <Card>
         <CardHeader><CardTitle>New Entry</CardTitle></CardHeader>
-        <CardContent><EntryForm primaryLabel={primaryLabel} secondaryLabel={secondaryLabel} primaryOptions={primaryOptions} onSubmit={onSubmit} /></CardContent>
+        <CardContent><EntryForm primaryLabel={primaryLabel} secondaryLabel={secondaryLabel} primaryOptions={primaryOptions} secondaryOptions={secondaryOptions} onSubmit={onSubmit} /></CardContent>
       </Card>
       <Card>
         <CardHeader><CardTitle>Entries</CardTitle></CardHeader>

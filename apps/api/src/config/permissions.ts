@@ -8,7 +8,8 @@ export type PermissionResource =
   | "dailyClosing"
   | "reports"
   | "users"
-  | "roles";
+  | "roles"
+  | "categories";
 
 export type Permission = `${PermissionResource}:${PermissionAction}`;
 

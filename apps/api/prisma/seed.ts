@@ -13,6 +13,7 @@ async function main() {
     "reports:view", "reports:read", "reports:write",
     "users:view", "users:read", "users:write",
     "roles:view", "roles:read", "roles:write",
+    "categories:view", "categories:read", "categories:write",
   ];
 
   const adminPermissions = [
@@ -22,6 +23,7 @@ async function main() {
     "purchases:view", "purchases:read", "purchases:write",
     "dailyClosing:view", "dailyClosing:read", "dailyClosing:write",
     "reports:view", "reports:read",
+    "categories:view", "categories:read", "categories:write",
   ];
 
   const managerPermissions = [
@@ -31,12 +33,14 @@ async function main() {
     "purchases:view", "purchases:read", "purchases:write",
     "dailyClosing:view", "dailyClosing:read", "dailyClosing:write",
     "reports:view", "reports:read",
+    "categories:read",
   ];
 
   const employeePermissions = [
     "dashboard:view", "revenue:view", "revenue:read", "revenue:write",
     "expenses:view", "expenses:read", "expenses:write",
     "purchases:view", "purchases:read", "purchases:write",
+    "categories:read",
   ];
 
   const superAdminRole = await prisma.role.upsert({
@@ -62,6 +66,31 @@ async function main() {
     update: { permissions: employeePermissions },
     create: { name: "EMPLOYEE", permissions: employeePermissions },
   });
+
+  const defaultCategories: Array<{ name: string; type: "REVENUE" | "EXPENSE" | "PURCHASE" }> = [
+    { name: "TOBACCO", type: "REVENUE" },
+    { name: "GROCERY", type: "REVENUE" },
+    { name: "NON_TAXABLE", type: "REVENUE" },
+    { name: "FOOD_STAMP", type: "REVENUE" },
+    { name: "LIQUOR", type: "REVENUE" },
+    { name: "WINE", type: "REVENUE" },
+    { name: "NON_ALCOHOLIC", type: "REVENUE" },
+    { name: "UTILITY", type: "EXPENSE" },
+    { name: "STORE_EXPENSE", type: "EXPENSE" },
+    { name: "ATM_COMMISSION", type: "EXPENSE" },
+    { name: "BAR_COMMISSION", type: "EXPENSE" },
+    { name: "MISC_EXPENSE", type: "EXPENSE" },
+    { name: "GENERAL", type: "PURCHASE" },
+    { name: "INVENTORY", type: "PURCHASE" },
+  ];
+
+  for (const c of defaultCategories) {
+    await prisma.category.upsert({
+      where: { name_type: { name: c.name, type: c.type } },
+      update: { isActive: true },
+      create: { name: c.name, type: c.type, isActive: true },
+    });
+  }
 
   const password = await bcrypt.hash("Admin@12345", 12);
   await prisma.user.upsert({

@@ -23,22 +23,23 @@ enum PaymentMethod {
   CARD
 }
 
-enum RevenueCategory {
-  TOBACCO
-  GROCERY
-  NON_TAXABLE
-  FOOD_STAMP
-  LIQUOR
-  WINE
-  NON_ALCOHOLIC
+enum CategoryType {
+  REVENUE
+  EXPENSE
+  PURCHASE
 }
 
-enum ExpenseType {
-  UTILITY
-  STORE_EXPENSE
-  ATM_COMMISSION
-  BAR_COMMISSION
-  MISC_EXPENSE
+model Category {
+  id        String       @id @default(cuid())
+  name      String
+  type      CategoryType
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([name, type])
+  @@index([type])
+  @@map("categories")
 }
 
 model User {
@@ -59,7 +60,7 @@ model User {
 
 model Revenue {
   id            String          @id @default(cuid())
-  category      RevenueCategory
+  category      String
   amount        Decimal         @db.Decimal(12, 2)
   paymentMethod PaymentMethod
   notes         String?
@@ -74,7 +75,7 @@ model Revenue {
 
 model Expense {
   id            String        @id @default(cuid())
-  expenseType   ExpenseType
+  expenseType   String
   amount        Decimal       @db.Decimal(12, 2)
   paymentMethod PaymentMethod
   notes         String?

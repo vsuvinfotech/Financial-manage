@@ -1,8 +1,32 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../config/prisma.js";
 import { getDateRange } from "../../utils/date-range.js";
+import { HttpError } from "../../utils/http-error.js";
 
 type ModelName = "revenue" | "expense" | "purchase";
+
+const categoryTypeByModel: Record<ModelName, "REVENUE" | "EXPENSE" | "PURCHASE"> = {
+  revenue: "REVENUE",
+  expense: "EXPENSE",
+  purchase: "PURCHASE",
+};
+
+const categoryFieldByModel: Record<ModelName, string> = {
+  revenue: "category",
+  expense: "expenseType",
+  purchase: "category",
+};
+
+async function assertCategory(model: ModelName, data: Record<string, unknown>) {
+  const field = categoryFieldByModel[model];
+  const value = data[field];
+  if (typeof value !== "string" || !value) return;
+  const category = await prisma.category.findUnique({
+    where: { name_type: { name: value, type: categoryTypeByModel[model] } },
+  });
+  if (!category) throw new HttpError(400, `Unknown ${field}: "${value}"`);
+  if (!category.isActive) throw new HttpError(400, `Category "${value}" is inactive`);
+}
 
 const searchableFields: Record<ModelName, string[]> = {
   revenue: ["notes"],
@@ -49,10 +73,12 @@ export function createEntryService<TCreate extends object>(model: ModelName) {
     },
 
     async create(data: TCreate, userId: string) {
+      await assertCategory(model, data as Record<string, unknown>);
       return client.create({ data: { ...data, createdBy: userId } });
     },
 
     async update(id: string, data: Partial<TCreate>) {
+      await assertCategory(model, data as Record<string, unknown>);
       return client.update({ where: { id }, data });
     },
 
