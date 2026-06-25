@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
-export type CategoryType = "REVENUE" | "EXPENSE" | "PURCHASE";
+export type CategoryType = "REVENUE" | "EXPENSE";
 export type Category = { id: string; name: string; type: CategoryType; isActive: boolean };
 
 export function useCategories(type?: CategoryType, activeOnly = true) {

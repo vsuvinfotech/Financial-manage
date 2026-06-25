@@ -5,10 +5,10 @@ import { HttpError } from "../../utils/http-error.js";
 
 type ModelName = "revenue" | "expense" | "purchase";
 
-const categoryTypeByModel: Record<ModelName, "REVENUE" | "EXPENSE" | "PURCHASE"> = {
+const categoryTypeByModel: Record<ModelName, "REVENUE" | "EXPENSE"> = {
   revenue: "REVENUE",
   expense: "EXPENSE",
-  purchase: "PURCHASE",
+  purchase: "REVENUE",
 };
 
 const categoryFieldByModel: Record<ModelName, string> = {
@@ -25,7 +25,8 @@ async function assertCategory(model: ModelName, data: Record<string, unknown>) {
     where: { name_type: { name: value, type: categoryTypeByModel[model] } },
   });
   if (!category) throw new HttpError(400, `Unknown ${field}: "${value}"`);
-  if (!category.isActive) throw new HttpError(400, `Category "${value}" is inactive`);
+  if (!category.isActive)
+    throw new HttpError(400, `Category "${value}" is inactive`);
 }
 
 const searchableFields: Record<ModelName, string[]> = {
@@ -35,11 +36,16 @@ const searchableFields: Record<ModelName, string[]> = {
 };
 
 function buildWhere(model: ModelName, query: Record<string, unknown>) {
-  const { from, to } = getDateRange(query);
   const search = typeof query.search === "string" ? query.search : undefined;
-  const where: Prisma.RevenueWhereInput | Prisma.ExpenseWhereInput | Prisma.PurchaseWhereInput = {
-    date: { gte: from, lte: to },
-  };
+  const hasDateFilter = typeof query.from === "string" || typeof query.to === "string";
+  const where:
+    | Prisma.RevenueWhereInput
+    | Prisma.ExpenseWhereInput
+    | Prisma.PurchaseWhereInput = {};
+  if (hasDateFilter) {
+    const { from, to } = getDateRange(query);
+    Object.assign(where, { date: { gte: from, lte: to } });
+  }
   if (search) {
     Object.assign(where, {
       OR: searchableFields[model].map((field) => ({
@@ -65,11 +71,16 @@ export function createEntryService<TCreate extends object>(model: ModelName) {
           orderBy: { [sortBy]: sortOrder },
           skip: (page - 1) * pageSize,
           take: pageSize,
-          include: { creator: { select: { id: true, name: true, email: true } } },
+          include: {
+            creator: { select: { id: true, name: true, email: true } },
+          },
         }),
         client.count({ where }),
       ]);
-      return { items, meta: { page, pageSize, total, pageCount: Math.ceil(total / pageSize) } };
+      return {
+        items,
+        meta: { page, pageSize, total, pageCount: Math.ceil(total / pageSize) },
+      };
     },
 
     async create(data: TCreate, userId: string) {

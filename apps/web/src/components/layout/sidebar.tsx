@@ -26,19 +26,27 @@ export function Sidebar() {
     return permissions.includes(`${item.href.replace("/", "")}:view`) || permissions.includes(`${item.href.replace("/", "")}:read`);
   });
   return (
-    <aside className="hidden w-64 border-r bg-card md:block">
+    <aside className="hidden w-64 border-r bg-gradient-to-b from-card to-background md:block">
       <div className="flex h-16 items-center border-b px-5">
-        <div>
-          <p className="text-sm font-semibold">Store Finance</p>
-          <p className="text-xs text-muted-foreground">Management Portal</p>
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md">
+            <BarChart3 className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold">Store Finance</p>
+            <p className="text-xs text-muted-foreground">Management Portal</p>
+          </div>
         </div>
       </div>
       <nav className="space-y-1 p-3">
         {allowedItems.map((item) => {
           const Icon = item.icon;
+          const active = pathname === item.href;
           return (
-            <Link key={item.href} href={item.href} className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground", pathname === item.href && "bg-primary/10 text-primary")}>
-              <Icon className="h-4 w-4" />
+            <Link key={item.href} href={item.href} className={cn("group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all", active ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/25" : "text-muted-foreground hover:bg-primary/10 hover:text-primary")}>
+              <div className={cn("flex h-7 w-7 items-center justify-center rounded-md transition-colors", active ? "bg-white/20" : "bg-muted group-hover:bg-primary/10")}>
+                <Icon className={cn("h-4 w-4", active && "text-white")} />
+              </div>
               {item.label}
             </Link>
           );

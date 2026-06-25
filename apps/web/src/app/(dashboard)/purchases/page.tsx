@@ -4,7 +4,7 @@ import { EntryPage } from "@/components/entries/entry-page";
 import { useCategoryNames } from "@/lib/use-categories";
 
 export default function PurchasesPage() {
-  const categories = useCategoryNames("PURCHASE");
+  const categories = useCategoryNames("REVENUE");
   return (
     <EntryPage
       title="Purchase Management"
@@ -12,8 +12,18 @@ export default function PurchasesPage() {
       primaryLabel="Vendor Name"
       secondaryLabel="Category"
       secondaryOptions={categories}
-      columns={[{ key: "vendorName", label: "Vendor" }, { key: "category", label: "Category" }]}
-      mapValues={(v) => ({ vendorName: v.primary, category: v.secondary, amount: v.amount, paymentMethod: v.paymentMethod, date: v.date, notes: v.notes })}
+      columns={[
+        { key: "vendorName", label: "Vendor" },
+        { key: "category", label: "Category" },
+      ]}
+      mapValues={(v) => ({
+        vendorName: v.primary,
+        category: v.secondary,
+        amount: v.amount,
+        paymentMethod: v.paymentMethod,
+        date: v.date,
+        notes: v.notes,
+      })}
     />
   );
 }

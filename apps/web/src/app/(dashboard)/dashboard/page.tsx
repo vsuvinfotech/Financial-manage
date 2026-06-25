@@ -9,6 +9,7 @@ import { SummaryCard } from "@/components/dashboard/summary-card";
 import { PaymentSplitChart, RevenueExpenseChart } from "@/components/dashboard/charts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 type Summary = { totalRevenue: number; totalExpenses: number; totalPurchases: number; cashTotal: number; cardTotal: number; netProfit: number };
 
@@ -37,26 +38,21 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 p-6 text-white shadow-xl">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-black/10 blur-3xl" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight drop-shadow-sm">Financial Dashboard</h1>
-            <p className="mt-1 text-sm text-white/80">Revenue, expenses, purchases, and closing balances at a glance.</p>
-          </div>
-          <Select value={filter} onValueChange={(val: any) => setFilter(val)}>
-            <SelectTrigger className="w-[200px] border-white/30 bg-white/15 text-white backdrop-blur hover:bg-white/25 focus:ring-white/40">
-              <SelectValue placeholder="Select filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="daily">Today (Daily)</SelectItem>
-              <SelectItem value="weekly">Last 7 Days (Weekly)</SelectItem>
-              <SelectItem value="monthly">This Month (Monthly)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <PageHeader
+        title="Financial Dashboard"
+        description="Revenue, expenses, purchases, and closing balances at a glance."
+      >
+        <Select value={filter} onValueChange={(val: any) => setFilter(val)}>
+          <SelectTrigger className="w-[200px] border-white/30 bg-white/15 text-white backdrop-blur hover:bg-white/25 focus:ring-white/40">
+            <SelectValue placeholder="Select filter" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="daily">Today (Daily)</SelectItem>
+            <SelectItem value="weekly">Last 7 Days (Weekly)</SelectItem>
+            <SelectItem value="monthly">This Month (Monthly)</SelectItem>
+          </SelectContent>
+        </Select>
+      </PageHeader>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <SummaryCard title="Revenue" value={data.totalRevenue} icon={TrendingUp} accent="emerald" />
         <SummaryCard title="Expenses" value={data.totalExpenses} icon={Receipt} accent="rose" />

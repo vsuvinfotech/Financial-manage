@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const categoryTypeSchema = z.enum(["REVENUE", "EXPENSE", "PURCHASE"]);
+export const categoryTypeSchema = z.enum(["REVENUE", "EXPENSE"]);
 
 export const listCategoriesQuerySchema = z.object({
   query: z.object({

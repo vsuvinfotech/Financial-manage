@@ -67,7 +67,7 @@ async function main() {
     create: { name: "EMPLOYEE", permissions: employeePermissions },
   });
 
-  const defaultCategories: Array<{ name: string; type: "REVENUE" | "EXPENSE" | "PURCHASE" }> = [
+  const defaultCategories: Array<{ name: string; type: "REVENUE" | "EXPENSE" }> = [
     { name: "TOBACCO", type: "REVENUE" },
     { name: "GROCERY", type: "REVENUE" },
     { name: "NON_TAXABLE", type: "REVENUE" },
@@ -80,8 +80,6 @@ async function main() {
     { name: "ATM_COMMISSION", type: "EXPENSE" },
     { name: "BAR_COMMISSION", type: "EXPENSE" },
     { name: "MISC_EXPENSE", type: "EXPENSE" },
-    { name: "GENERAL", type: "PURCHASE" },
-    { name: "INVENTORY", type: "PURCHASE" },
   ];
 
   for (const c of defaultCategories) {

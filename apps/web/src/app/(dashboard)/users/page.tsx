@@ -2,17 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Users, Shield, UserPlus, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { roleRank } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAccent, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 type Role = string;
 type User = { id: string; name: string; email: string; role: Role; createdAt: string; updatedAt: string };
@@ -94,30 +96,36 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Users & Permissions</h1>
-        <p className="text-sm text-muted-foreground">Create users, assign roles, and review read, write, and view access.</p>
-      </div>
+      <PageHeader
+        title="Users & Permissions"
+        description="Create users, assign roles, and review read, write, and view access."
+      />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-        <Card>
-          <CardHeader><CardTitle>{isEditing ? "Update User" : "Add User"}</CardTitle></CardHeader>
+        <Card className="overflow-hidden border-0 shadow-md">
+          <CardAccent className="from-indigo-500 via-purple-500 to-pink-500" />
+          <CardHeader>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md">
+              <UserPlus className="h-5 w-5" />
+            </div>
+            <CardTitle className="text-lg font-semibold">{isEditing ? "Update User" : "Add User"}</CardTitle>
+          </CardHeader>
           <CardContent>
             <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>Name</Label>
+                <Label className="font-semibold">Name</Label>
                 <Input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} required />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label className="font-semibold">Email</Label>
                 <Input type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} required />
               </div>
               <div className="space-y-2">
-                <Label>{isEditing ? "New Password" : "Password"}</Label>
+                <Label className="font-semibold">{isEditing ? "New Password" : "Password"}</Label>
                 <Input type="password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder={isEditing ? "Leave blank to keep current" : ""} required={!isEditing} />
               </div>
               <div className="space-y-2">
-                <Label>Role</Label>
+                <Label className="font-semibold">Role</Label>
                 <Select value={form.role} onValueChange={(value) => setForm((current) => ({ ...current, role: value as Role }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -126,15 +134,21 @@ export default function UsersPage() {
                 </Select>
               </div>
               <div className="flex gap-2 md:col-span-2">
-                <Button disabled={saveUser.isPending}>{isEditing ? "Update User" : "Add User"}</Button>
+                <Button variant="gradient" disabled={saveUser.isPending}>{isEditing ? "Update User" : "Add User"}</Button>
                 {isEditing && <Button type="button" variant="outline" onClick={() => setForm(emptyForm)}>Cancel</Button>}
               </div>
             </form>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Permission Matrix</CardTitle></CardHeader>
+        <Card className="overflow-hidden border-0 shadow-md">
+          <CardAccent className="from-amber-500 via-orange-500 to-rose-500" />
+          <CardHeader>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md">
+              <Shield className="h-5 w-5" />
+            </div>
+            <CardTitle className="text-lg font-semibold">Permission Matrix</CardTitle>
+          </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
@@ -143,10 +157,15 @@ export default function UsersPage() {
               <TableBody>
                 {groupedPermissions.map((item) => (
                   <TableRow key={item.name}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.view}</TableCell>
-                    <TableCell>{item.read}</TableCell>
-                    <TableCell>{item.write}</TableCell>
+                    <TableCell className="font-medium">
+                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", item.name === "SUPERADMIN" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
+                        {item.name === "SUPERADMIN" && <Crown className="h-3 w-3" />}
+                        {item.name}
+                      </span>
+                    </TableCell>
+                    <TableCell><span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-xs font-semibold text-sky-700 dark:bg-sky-950 dark:text-sky-300">{item.view}</span></TableCell>
+                    <TableCell><span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700 dark:bg-violet-950 dark:text-violet-300">{item.read}</span></TableCell>
+                    <TableCell><span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">{item.write}</span></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -155,8 +174,15 @@ export default function UsersPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle>Team Members</CardTitle></CardHeader>
+      <Card className="overflow-hidden border-0 shadow-md">
+        <CardAccent className="from-sky-500 via-blue-500 to-indigo-500" />
+        <CardHeader>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-md">
+            <Users className="h-5 w-5" />
+          </div>
+          <CardTitle className="text-lg font-semibold">Team Members</CardTitle>
+          <p className="text-sm text-muted-foreground">Manage users and their access levels.</p>
+        </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
@@ -167,12 +193,16 @@ export default function UsersPage() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", user.role === "SUPERADMIN" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : user.role === "ADMIN" ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300" : user.role === "MANAGER" ? "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
+                      {user.role}
+                    </span>
+                  </TableCell>
                   <TableCell>{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => editUser(user)} disabled={!canManage(user)}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost" onClick={() => deleteUser.mutate(user.id)} disabled={!canManage(user) || user.id === currentUser?.id}><Trash2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-sky-500 hover:bg-sky-500/10 hover:text-sky-600" onClick={() => editUser(user)} disabled={!canManage(user)}><Pencil className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-rose-500 hover:bg-rose-500/10 hover:text-rose-600" onClick={() => deleteUser.mutate(user.id)} disabled={!canManage(user) || user.id === currentUser?.id}><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>

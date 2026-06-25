@@ -37,7 +37,7 @@ export function RevenueExpenseChart({ data }: { data: Array<{ date: string; reve
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
             <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} axisLine={false} />
             <YAxis tick={{ fill: "#64748b", fontSize: 12 }} tickLine={false} axisLine={false} />
-            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "rgba(99,102,241,0.08)" }} />
+            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "rgba(99,102,241,0.08)" }} labelStyle={{ color: "white" }} itemStyle={{ color: "white" }} />
             <Legend iconType="circle" wrapperStyle={{ paddingTop: 10 }} />
             <Bar dataKey="revenue" fill="url(#revGrad)" radius={[8, 8, 0, 0]} />
             <Bar dataKey="expenses" fill="url(#expGrad)" radius={[8, 8, 0, 0]} />
@@ -72,7 +72,7 @@ export function PaymentSplitChart({ data }: { data: Array<{ name: string; value:
                 <Cell key={index} fill={splitColors[index % splitColors.length]} />
               ))}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "white" }} itemStyle={{ color: "white" }} />
             <Legend iconType="circle" wrapperStyle={{ paddingTop: 10 }} />
           </PieChart>
         </ResponsiveContainer>

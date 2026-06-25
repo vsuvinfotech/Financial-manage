@@ -27,13 +27,11 @@ categoriesRoutes.get(
       permissions.includes("categories:view") ||
       permissions.includes("revenue:write") ||
       permissions.includes("expenses:write") ||
-      permissions.includes("purchases:write") ||
       permissions.includes("revenue:read") ||
-      permissions.includes("expenses:read") ||
-      permissions.includes("purchases:read");
+      permissions.includes("expenses:read");
     if (!allowed) throw new HttpError(403, "Insufficient permissions");
 
-    const { type, isActive } = req.query as { type?: "REVENUE" | "EXPENSE" | "PURCHASE"; isActive?: boolean };
+    const { type, isActive } = req.query as { type?: "REVENUE" | "EXPENSE"; isActive?: boolean };
     const categories = await prisma.category.findMany({
       where: {
         ...(type ? { type } : {}),
@@ -110,19 +108,16 @@ categoriesRoutes.delete(
     if (!existing) throw new HttpError(404, "Category not found");
 
     // Block hard-delete if category is referenced by any entries; soft-disable instead.
-    const [revCount, expCount, purCount] = await Promise.all([
+    const [revCount, expCount] = await Promise.all([
       existing.type === "REVENUE"
         ? prisma.revenue.count({ where: { category: existing.name } })
         : Promise.resolve(0),
       existing.type === "EXPENSE"
         ? prisma.expense.count({ where: { expenseType: existing.name } })
         : Promise.resolve(0),
-      existing.type === "PURCHASE"
-        ? prisma.purchase.count({ where: { category: existing.name } })
-        : Promise.resolve(0),
     ]);
 
-    if (revCount + expCount + purCount > 0) {
+    if (revCount + expCount > 0) {
       const category = await prisma.category.update({
         where: { id: existing.id },
         data: { isActive: false },
