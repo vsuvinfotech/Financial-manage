@@ -23,6 +23,7 @@ export default function PurchasesPage() {
         paymentMethod: v.paymentMethod,
         date: v.date,
         notes: v.notes,
+        storeId: v.storeId,
       })}
     />
   );

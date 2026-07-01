@@ -8,6 +8,9 @@ declare global {
       role: AppRole;
       name: string;
       permissions: string[];
+      companyId: string | null;
+      companySlug: string | null;
+      allowedStoreIds: string[];
     }
 
     interface Request {

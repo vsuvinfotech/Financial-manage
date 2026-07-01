@@ -20,6 +20,7 @@ const entryBase = {
   paymentMethod: paymentMethodSchema,
   notes: z.string().max(500).optional().nullable(),
   date: z.coerce.date(),
+  storeId: z.string().min(1),
 };
 
 export const revenueCreateSchema = z.object({
@@ -51,6 +52,16 @@ export const purchaseCreateSchema = z.object({
 });
 export const purchaseUpdateSchema = z.object({
   body: purchaseCreateSchema.shape.body.partial(),
+});
+
+export const taxCreateSchema = z.object({
+  body: z.object({
+    ...entryBase,
+    taxType: z.string().min(1).max(60),
+  }),
+});
+export const taxUpdateSchema = z.object({
+  body: taxCreateSchema.shape.body.partial(),
 });
 
 export const idParamsSchema = z.object({ params: z.object({ id: z.string().min(1) }) });

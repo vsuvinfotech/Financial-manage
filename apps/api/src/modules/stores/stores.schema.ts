@@ -1,10 +1,7 @@
 import { z } from "zod";
 
-export const categoryTypeSchema = z.enum(["REVENUE", "EXPENSE"]);
-
-export const listCategoriesQuerySchema = z.object({
+export const listStoresQuerySchema = z.object({
   query: z.object({
-    type: categoryTypeSchema.optional(),
     companyId: z.string().optional(),
     isActive: z
       .union([z.literal("true"), z.literal("false")])
@@ -13,24 +10,23 @@ export const listCategoriesQuerySchema = z.object({
   }),
 });
 
-export const createCategorySchema = z.object({
+export const createStoreSchema = z.object({
   body: z.object({
-    name: z.string().min(2).max(60),
-    type: categoryTypeSchema,
+    name: z.string().min(2).max(80),
     isActive: z.boolean().optional(),
+    // Platform admins may create stores for a specific company.
     companyId: z.string().optional(),
   }),
 });
 
-export const updateCategorySchema = z.object({
+export const updateStoreSchema = z.object({
   params: z.object({ id: z.string().min(1) }),
   body: z.object({
-    name: z.string().min(2).max(60).optional(),
-    type: categoryTypeSchema.optional(),
+    name: z.string().min(2).max(80).optional(),
     isActive: z.boolean().optional(),
   }),
 });
 
-export const categoryParamsSchema = z.object({
+export const storeParamsSchema = z.object({
   params: z.object({ id: z.string().min(1) }),
 });

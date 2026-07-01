@@ -6,7 +6,7 @@ import { loginSchema, refreshSchema, registerSchema } from "./auth.schema.js";
 
 export const authRoutes = Router();
 
-authRoutes.post("/register", authenticate, authorize("SUPERADMIN", "ADMIN"), validate(registerSchema), authController.register);
+authRoutes.post("/register", authenticate, authorize("PLATFORM_ADMIN", "OWNER", "ADMIN"), validate(registerSchema), authController.register);
 authRoutes.post("/login", validate(loginSchema), authController.login);
 authRoutes.post("/refresh", validate(refreshSchema), authController.refresh);
 authRoutes.post("/logout", authenticate, authController.logout);

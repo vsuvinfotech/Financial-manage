@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const roleSchema = z.enum(["SUPERADMIN", "ADMIN", "MANAGER", "EMPLOYEE"]);
+export const roleSchema = z.enum(["PLATFORM_ADMIN", "OWNER", "ADMIN", "MANAGER", "EMPLOYEE"]);
 
 export const registerSchema = z.object({
   body: z.object({
@@ -8,6 +8,7 @@ export const registerSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
     role: roleSchema.default("EMPLOYEE"),
+    companyId: z.string().optional(),
   }),
 });
 

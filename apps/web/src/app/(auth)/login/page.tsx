@@ -5,9 +5,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { BarChart3, Mail, Lock, Sparkles } from "lucide-react";
+import { BarChart3, Mail, Lock, Sparkles, Building2 } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuthStore, User } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 import { Card, CardAccent, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,13 @@ import { Label } from "@/components/ui/label";
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  companySlug: z.string().optional(),
 });
 
 type LoginResponse = {
   accessToken: string;
   refreshToken: string;
-  user: { id: string; name: string; email: string; role: string; permissions: string[] };
+  user: User;
 };
 
 export default function LoginPage() {
@@ -29,12 +30,16 @@ export default function LoginPage() {
   const setSession = useAuthStore((state) => state.setSession);
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { email: "admin@store.local", password: "Admin@12345" },
+    defaultValues: { email: "owner@demo.local", password: "Owner@12345", companySlug: "demo" },
   });
 
   async function onSubmit(values: z.infer<typeof schema>) {
     try {
-      const session = await api<LoginResponse>("/auth/login", { method: "POST", body: JSON.stringify(values) });
+      const session = await api<LoginResponse>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email: values.email, password: values.password }),
+        headers: values.companySlug ? { "X-Tenant-Slug": values.companySlug } : {},
+      });
       setSession(session);
       router.push("/dashboard");
     } catch (error) {
@@ -76,6 +81,15 @@ export default function LoginPage() {
                 Password
               </Label>
               <Input type="password" {...form.register("password")} />
+            </div>
+            <div className="space-y-2">
+              <Label className="inline-flex items-center gap-2 font-semibold">
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300">
+                  <Building2 className="h-3.5 w-3.5" />
+                </span>
+                Tenant Slug (optional for platform admin)
+              </Label>
+              <Input {...form.register("companySlug")} placeholder="demo" />
             </div>
             <Button variant="gradient" className="w-full" disabled={form.formState.isSubmitting}>
               <Sparkles className="h-4 w-4" />

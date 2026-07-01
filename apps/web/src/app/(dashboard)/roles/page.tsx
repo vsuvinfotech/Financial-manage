@@ -25,6 +25,10 @@ const availablePermissions = [
   "reports:view", "reports:read", "reports:write",
   "users:view", "users:read", "users:write",
   "roles:view", "roles:read", "roles:write",
+  "categories:view", "categories:read", "categories:write",
+  "taxes:view", "taxes:read", "taxes:write",
+  "stores:view", "stores:read", "stores:write",
+  "companies:view", "companies:read", "companies:write",
 ];
 
 const emptyForm = { name: "", permissions: [] as string[] };
@@ -92,6 +96,10 @@ export default function RolesPage() {
     reports: "bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-800",
     users: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200 dark:bg-fuchsia-950 dark:text-fuchsia-300 dark:border-fuchsia-800",
     roles: "bg-pink-100 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-800",
+    categories: "bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800",
+    taxes: "bg-lime-100 text-lime-700 border-lime-200 dark:bg-lime-950 dark:text-lime-300 dark:border-lime-800",
+    stores: "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800",
+    companies: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
   };
 
   return (
@@ -166,7 +174,7 @@ export default function RolesPage() {
               {(roles.data ?? []).map((role) => (
                 <TableRow key={role.id}>
                   <TableCell className="font-medium">
-                    <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium", role.name === "SUPERADMIN" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
+                    <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium", role.name === "PLATFORM_ADMIN" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
                       <UserCog className="h-3 w-3" />
                       {role.name}
                     </span>
@@ -179,7 +187,7 @@ export default function RolesPage() {
                   <TableCell>
                     <div className="flex gap-1">
                       <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-sky-500 hover:bg-sky-500/10 hover:text-sky-600" onClick={() => editRole(role)}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-rose-500 hover:bg-rose-500/10 hover:text-rose-600" onClick={() => deleteRole.mutate(role.id)} disabled={["SUPERADMIN", "ADMIN", "MANAGER", "EMPLOYEE"].includes(role.name)}><Trash2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-rose-500 hover:bg-rose-500/10 hover:text-rose-600" onClick={() => deleteRole.mutate(role.id)} disabled={["PLATFORM_ADMIN", "OWNER", "ADMIN", "MANAGER", "EMPLOYEE"].includes(role.name)}><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </TableCell>
                 </TableRow>

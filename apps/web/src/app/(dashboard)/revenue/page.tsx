@@ -12,7 +12,7 @@ export default function RevenuePage() {
       primaryLabel="Category"
       primaryOptions={categories}
       columns={[{ key: "category", label: "Category" }]}
-      mapValues={(v) => ({ category: v.primary, amount: v.amount, paymentMethod: v.paymentMethod, date: v.date, notes: v.notes })}
+      mapValues={(v) => ({ category: v.primary, amount: v.amount, paymentMethod: v.paymentMethod, date: v.date, notes: v.notes, storeId: v.storeId })}
     />
   );
 }

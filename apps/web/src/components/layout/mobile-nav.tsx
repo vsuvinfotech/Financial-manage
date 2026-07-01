@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, ClipboardCheck, Home, Receipt, ShoppingBag, WalletCards } from "lucide-react";
+import { BarChart3, ClipboardCheck, Home, Receipt, ShoppingBag, WalletCards, Calculator } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
@@ -12,6 +12,7 @@ const items = [
   { href: "/revenue", label: "Revenue", icon: WalletCards },
   { href: "/expenses", label: "Expense", icon: Receipt },
   { href: "/purchases", label: "Buy", icon: ShoppingBag },
+  { href: "/taxes", label: "Taxes", icon: Calculator },
   { href: "/daily-closing", label: "Close", icon: ClipboardCheck },
   { href: "/reports", label: "Reports", icon: BarChart3 },
 ];

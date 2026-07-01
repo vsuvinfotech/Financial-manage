@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { currency, cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
 
 type Accent =
   | "emerald"
@@ -8,7 +9,8 @@ type Accent =
   | "amber"
   | "sky"
   | "violet"
-  | "indigo";
+  | "indigo"
+  | "cyan";
 
 const accents: Record<Accent, { gradient: string; ring: string; iconBg: string; iconText: string; glow: string }> = {
   emerald: {
@@ -53,6 +55,13 @@ const accents: Record<Accent, { gradient: string; ring: string; iconBg: string; 
     iconText: "text-white",
     glow: "shadow-indigo-500/30",
   },
+  cyan: {
+    gradient: "from-cyan-500 via-teal-500 to-emerald-500",
+    ring: "ring-cyan-300/40",
+    iconBg: "bg-white/20",
+    iconText: "text-white",
+    glow: "shadow-cyan-500/30",
+  },
 };
 
 export function SummaryCard({
@@ -66,26 +75,28 @@ export function SummaryCard({
   icon: LucideIcon;
   accent?: Accent;
 }) {
+    const user = useAuthStore((state) => state.user);
+    const isPlatformAdmin = user?.role === "PLATFORM_ADMIN";
   const a = accents[accent];
   return (
     <Card
       className={cn(
         "relative overflow-hidden border-0 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl",
         "bg-gradient-to-br",
-        a.gradient,
-        a.glow,
+        a?.gradient ?? accents.indigo.gradient,
+        a?.glow ?? accents.indigo.glow,
       )}
     >
       <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15 blur-2xl" />
       <div className="pointer-events-none absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-black/10 blur-2xl" />
       <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-white/90">{title}</CardTitle>
-        <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl ring-1", a.iconBg, a.ring)}>
-          <Icon className={cn("h-5 w-5", a.iconText)} />
+        <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl ring-1", a?.iconBg??a?.iconBg, a?.ring ?? a?.ring)}>
+          <Icon className={cn("h-5 w-5", a?.iconText ?? a?.iconText)} />
         </div>
       </CardHeader>
       <CardContent className="relative">
-        <div className="text-2xl font-bold tracking-tight drop-shadow-sm">{currency(value)}</div>
+        <div className="text-2xl font-bold tracking-tight drop-shadow-sm">{!isPlatformAdmin?currency(value):value}</div>
       </CardContent>
     </Card>
   );

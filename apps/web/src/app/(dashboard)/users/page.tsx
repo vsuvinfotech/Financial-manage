@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, Users, Shield, UserPlus, Crown } from "lucide-react";
+import { Pencil, Trash2, Users, Shield, UserPlus, Crown, Store as StoreIcon, X } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { roleRank } from "@/lib/constants";
+import { roleRank, roleBadgeColors } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
+import { useStores } from "@/lib/use-stores";
 import { Button } from "@/components/ui/button";
 import { Card, CardAccent, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,21 +20,31 @@ import { PageHeader } from "@/components/dashboard/page-header";
 type Role = string;
 type User = { id: string; name: string; email: string; role: Role; createdAt: string; updatedAt: string };
 type RolePermissions = { id: string; name: string; permissions: string[] };
-type FormState = { id?: string; name: string; email: string; password: string; role: Role };
+type StoreRef = { id: string; name: string };
+type FormState = { id?: string; name: string; email: string; password: string; role: Role; storeIds: string[] };
 
 const emptyForm: FormState = {
   name: "",
   email: "",
   password: "",
   role: "EMPLOYEE",
+  storeIds: [],
 };
 
 export default function UsersPage() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>(emptyForm);
   const currentUser = useAuthStore((state) => state.user);
+  const { stores } = useStores();
+  const [managingUser, setManagingUser] = useState<User | null>(null);
   const users = useQuery({ queryKey: ["users"], queryFn: () => api<User[]>("/users") });
   const roleMatrix = useQuery({ queryKey: ["roles"], queryFn: () => api<RolePermissions[]>("/roles") });
+
+  const storeAccess = useQuery({
+    queryKey: ["store-access", managingUser?.id],
+    queryFn: () => api<StoreRef[]>(`/users/${managingUser!.id}/store-access`),
+    enabled: Boolean(managingUser?.id),
+  });
 
   const isEditing = Boolean(form.id);
   const groupedPermissions = useMemo(() => {
@@ -47,14 +58,14 @@ export default function UsersPage() {
 
   const saveUser = useMutation({
     mutationFn: () => {
-      const payload: Record<string, string> = {
+      const payload: Record<string, unknown> = {
         name: form.name,
         email: form.email,
         role: form.role,
       };
       if (form.password) payload.password = form.password;
       if (form.id) return api(`/users/${form.id}`, { method: "PUT", body: JSON.stringify(payload) });
-      return api("/users", { method: "POST", body: JSON.stringify({ ...payload, password: form.password }) });
+      return api("/users", { method: "POST", body: JSON.stringify({ ...payload, password: form.password, storeIds: form.storeIds }) });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -74,15 +85,35 @@ export default function UsersPage() {
   });
 
   function editUser(user: User) {
-    setForm({ id: user.id, name: user.name, email: user.email, password: "", role: user.role });
+    setForm({ id: user.id, name: user.name, email: user.email, password: "", role: user.role, storeIds: [] });
   }
+
+  const grantAccess = useMutation({
+    mutationFn: (storeId: string) =>
+      api(`/users/${managingUser!.id}/store-access`, { method: "POST", body: JSON.stringify({ storeIds: [storeId] }) }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["store-access", managingUser?.id] });
+      toast.success("Store access granted");
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Unable to grant access"),
+  });
+
+  const revokeAccess = useMutation({
+    mutationFn: (storeId: string) =>
+      api(`/users/${managingUser!.id}/store-access/${storeId}`, { method: "DELETE" }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["store-access", managingUser?.id] });
+      toast.success("Store access revoked");
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Unable to revoke access"),
+  });
 
   function canManage(user: User) {
     if (!currentUser) return false;
-    if (currentUser.role === "SUPERADMIN") return true;
+    if (currentUser.role === "PLATFORM_ADMIN") return true;
     const actorRank = roleRank[currentUser.role as keyof typeof roleRank] || 0;
     const targetRank = roleRank[user.role as keyof typeof roleRank] || 0;
-    return actorRank > targetRank && user.role !== "SUPERADMIN";
+    return actorRank > targetRank && user.role !== "PLATFORM_ADMIN";
   }
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -133,6 +164,40 @@ export default function UsersPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {!isEditing && stores.length > 0 && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="font-semibold">Store Access</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {stores.map((store) => {
+                      const selected = form.storeIds.includes(store.id);
+                      return (
+                        <button
+                          type="button"
+                          key={store.id}
+                          onClick={() =>
+                            setForm((current) => ({
+                              ...current,
+                              storeIds: selected
+                                ? current.storeIds.filter((id) => id !== store.id)
+                                : [...current.storeIds, store.id],
+                            }))
+                          }
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition",
+                            selected
+                              ? "border-transparent bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow"
+                              : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300",
+                          )}
+                        >
+                          <StoreIcon className="h-3 w-3" />
+                          {store.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Store access can be adjusted after creation from the team list.</p>
+                </div>
+              )}
               <div className="flex gap-2 md:col-span-2">
                 <Button variant="gradient" disabled={saveUser.isPending}>{isEditing ? "Update User" : "Add User"}</Button>
                 {isEditing && <Button type="button" variant="outline" onClick={() => setForm(emptyForm)}>Cancel</Button>}
@@ -158,8 +223,8 @@ export default function UsersPage() {
                 {groupedPermissions.map((item) => (
                   <TableRow key={item.name}>
                     <TableCell className="font-medium">
-                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", item.name === "SUPERADMIN" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
-                        {item.name === "SUPERADMIN" && <Crown className="h-3 w-3" />}
+                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", item.name === "PLATFORM_ADMIN" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
+                        {item.name === "PLATFORM_ADMIN" && <Crown className="h-3 w-3" />}
                         {item.name}
                       </span>
                     </TableCell>
@@ -194,13 +259,14 @@ export default function UsersPage() {
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", user.role === "SUPERADMIN" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" : user.role === "ADMIN" ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300" : user.role === "MANAGER" ? "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
+                    <span className={cn("inline-flex rounded-full px-2.5 py-1 text-xs font-medium", roleBadgeColors[user.role as keyof typeof roleBadgeColors] ?? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300")}>
                       {user.role}
                     </span>
                   </TableCell>
                   <TableCell>{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-indigo-500 hover:bg-indigo-500/10 hover:text-indigo-600" onClick={() => setManagingUser(user)} disabled={!canManage(user)} title="Manage store access"><StoreIcon className="h-4 w-4" /></Button>
                       <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-sky-500 hover:bg-sky-500/10 hover:text-sky-600" onClick={() => editUser(user)} disabled={!canManage(user)}><Pencil className="h-4 w-4" /></Button>
                       <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full text-rose-500 hover:bg-rose-500/10 hover:text-rose-600" onClick={() => deleteUser.mutate(user.id)} disabled={!canManage(user) || user.id === currentUser?.id}><Trash2 className="h-4 w-4" /></Button>
                     </div>
@@ -211,6 +277,42 @@ export default function UsersPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {managingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setManagingUser(null)}>
+          <Card className="w-full max-w-lg overflow-hidden border-0 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <CardAccent className="from-indigo-500 via-purple-500 to-pink-500" />
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg font-semibold">Store Access</CardTitle>
+                  <p className="text-sm text-muted-foreground">{managingUser.name} ({managingUser.email})</p>
+                </div>
+                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" onClick={() => setManagingUser(null)}><X className="h-4 w-4" /></Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {stores.length === 0 && <p className="text-sm text-muted-foreground">No stores available.</p>}
+              {stores.map((store) => {
+                const granted = (storeAccess.data ?? []).some((s) => s.id === store.id);
+                return (
+                  <div key={store.id} className="flex items-center justify-between rounded-lg border p-3">
+                    <span className="flex items-center gap-2 text-sm font-medium">
+                      <StoreIcon className="h-4 w-4 text-indigo-500" />
+                      {store.name}
+                    </span>
+                    {granted ? (
+                      <Button size="sm" variant="outline" className="border-rose-200 text-rose-600 hover:bg-rose-50" onClick={() => revokeAccess.mutate(store.id)} disabled={revokeAccess.isPending}>Revoke</Button>
+                    ) : (
+                      <Button size="sm" variant="gradient" onClick={() => grantAccess.mutate(store.id)} disabled={grantAccess.isPending}>Grant</Button>
+                    )}
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

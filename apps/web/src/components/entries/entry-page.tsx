@@ -29,13 +29,19 @@ export function EntryPage({
 }) {
   const queryClient = useQueryClient();
   async function onSubmit(values: EntryFormValues) {
-    await api(endpoint, {
-      method: "POST",
-      body: JSON.stringify(mapValues(values)),
-    });
-    await queryClient.invalidateQueries({ queryKey: [endpoint] });
-    toast.success("Entry saved");
+    try {
+      await api(endpoint, {
+        method: "POST",
+        body: JSON.stringify(mapValues(values)),
+      });
+      await queryClient.invalidateQueries({ queryKey: [endpoint] });
+      toast.success("Entry saved");
+
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Entry failed");
+    }
   }
+
   return (
     <div className="space-y-6">
       <PageHeader

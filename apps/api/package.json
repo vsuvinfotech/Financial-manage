@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",

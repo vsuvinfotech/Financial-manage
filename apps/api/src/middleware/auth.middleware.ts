@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env.js";
 import { HttpError } from "../utils/http-error.js";
-import type { AppRole, Permission } from "../config/permissions.js";
+import { isPlatformAdmin, type AppRole, type Permission } from "../config/permissions.js";
 
 type AccessPayload = Express.User & { type: "access" };
 
@@ -20,11 +20,34 @@ export function authenticate(req: Request, _res: Response, next: NextFunction) {
       role: payload.role,
       name: payload.name,
       permissions: payload.permissions || [],
+      companyId: payload.companyId ?? null,
+      companySlug: payload.companySlug ?? null,
+      allowedStoreIds: payload.allowedStoreIds ?? [],
     };
     next();
   } catch {
     throw new HttpError(401, "Invalid or expired token");
   }
+}
+
+/**
+ * Ensures the caller may act on the store identified by `req.body.storeId`,
+ * `req.params.storeId`, or `req.query.storeId`. Platform admins bypass the check.
+ */
+export function requireStoreAccess(req: Request, _res: Response, next: NextFunction) {
+  if (!req.user) throw new HttpError(401, "Authentication required");
+  if (isPlatformAdmin(req.user.role)) return next();
+
+  const storeId =
+    (req.body && (req.body.storeId as string | undefined)) ||
+    (req.params && (req.params.storeId as string | undefined)) ||
+    (typeof req.query?.storeId === "string" ? (req.query.storeId as string) : undefined);
+
+  if (!storeId) throw new HttpError(400, "storeId is required");
+  if (!req.user.allowedStoreIds.includes(storeId)) {
+    throw new HttpError(403, "You do not have access to this store");
+  }
+  next();
 }
 
 export function authorize(...roles: AppRole[]) {

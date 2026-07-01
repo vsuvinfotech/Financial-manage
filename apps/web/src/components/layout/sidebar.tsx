@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Shield, BarChart3, ClipboardCheck, Home, Receipt, ShoppingBag, Tags, Users, WalletCards } from "lucide-react";
+import { Shield, BarChart3, ClipboardCheck, Home, Receipt, ShoppingBag, Tags, Users, WalletCards, Landmark, Store, Calculator } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -11,11 +11,14 @@ const items = [
   { href: "/revenue", label: "Revenue", icon: WalletCards },
   { href: "/expenses", label: "Expenses", icon: Receipt },
   { href: "/purchases", label: "Purchases", icon: ShoppingBag },
+  { href: "/taxes", label: "Taxes", icon: Calculator, permission: "taxes:read" },
   { href: "/daily-closing", label: "Daily Closing", icon: ClipboardCheck },
   { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/users", label: "Users", icon: Users, permission: "users:read" },
   { href: "/roles", label: "Roles", icon: Shield, permission: "roles:read" },
   { href: "/categories", label: "Categories", icon: Tags, permission: "categories:read" },
+  { href: "/stores", label: "Stores", icon: Store, permission: "stores:read" },
+  { href: "/companies", label: "Companies", icon: Landmark, permission: "companies:read" },
 ];
 
 export function Sidebar() {

@@ -12,7 +12,7 @@ export default function ExpensesPage() {
       primaryLabel="Expense Type"
       primaryOptions={categories}
       columns={[{ key: "expenseType", label: "Expense Type" }]}
-      mapValues={(v) => ({ expenseType: v.primary, amount: v.amount, paymentMethod: v.paymentMethod, date: v.date, notes: v.notes })}
+      mapValues={(v) => ({ expenseType: v.primary, amount: v.amount, paymentMethod: v.paymentMethod, date: v.date, notes: v.notes, storeId: v.storeId })}
     />
   );
 }

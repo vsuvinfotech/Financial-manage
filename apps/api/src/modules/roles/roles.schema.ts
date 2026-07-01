@@ -4,6 +4,7 @@ export const createRoleSchema = z.object({
   body: z.object({
     name: z.string().min(2),
     permissions: z.array(z.string()),
+    companyId: z.string().optional(),
   }),
 });
 

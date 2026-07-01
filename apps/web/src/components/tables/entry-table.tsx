@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowDownUp, CalendarDays, ChevronLeft, ChevronRight, Search, X, Wallet, CreditCard } from "lucide-react";
 import { api } from "@/lib/api";
 import { currency, cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,6 +14,8 @@ type Entry = Record<string, string | number | null> & { id: string; amount: numb
 type Paginated = { items: Entry[]; meta: { total: number } };
 
 export function EntryTable({ endpoint, columns }: { endpoint: string; columns: Array<{ key: string; label: string }> }) {
+  const activeStoreId = useAuthStore((state) => state.activeStoreId);
+  const isAllStores = activeStoreId === "all";
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -24,11 +27,12 @@ export function EntryTable({ endpoint, columns }: { endpoint: string; columns: A
     if (search) params.set("search", search);
     if (fromDate) params.set("from", fromDate);
     if (toDate) params.set("to", toDate);
+    if (activeStoreId && !isAllStores) params.set("storeId", activeStoreId);
     return `${endpoint}?${params.toString()}`;
   }
 
   const query = useQuery({
-    queryKey: [endpoint, search, page, sortOrder, fromDate, toDate],
+    queryKey: [endpoint, search, page, sortOrder, fromDate, toDate, activeStoreId],
     queryFn: () => api<Paginated>(buildUrl()),
   });
 

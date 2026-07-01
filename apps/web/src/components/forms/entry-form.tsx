@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { paymentMethods } from "@/lib/constants";
-import { Wallet, Receipt, Tag, Calendar, FileText, DollarSign } from "lucide-react";
+import { useStores } from "@/lib/use-stores";
+import { Wallet, Receipt, Tag, Calendar, FileText, DollarSign, Store } from "lucide-react";
 
 const schema = z.object({
   primary: z.string().min(1),
@@ -23,6 +25,7 @@ const schema = z.object({
   paymentMethod: z.enum(paymentMethods),
   date: z.string().min(1),
   notes: z.string().optional(),
+  storeId: z.string().min(1),
 });
 
 export type EntryFormValues = z.infer<typeof schema>;
@@ -40,13 +43,24 @@ export function EntryForm({
   secondaryOptions?: readonly string[];
   onSubmit: (values: EntryFormValues) => Promise<void>;
 }) {
+  const { stores, activeStore } = useStores();
+  const defaultStoreId = useMemo(() => {
+    if (activeStore) return activeStore.id;
+    return stores[0]?.id;
+  }, [activeStore, stores]);
+
   const form = useForm<EntryFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       paymentMethod: "CASH",
       date: new Date().toISOString().slice(0, 10),
+      storeId: defaultStoreId ?? "",
     },
   });
+
+  useEffect(() => {
+    if (defaultStoreId) form.setValue("storeId", defaultStoreId);
+  }, [defaultStoreId, form]);
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
@@ -150,6 +164,29 @@ export function EntryForm({
           max={new Date().toISOString().split("T")[0]}
           {...form.register("date")}
         />
+      </div>
+      <div className="space-y-2">
+        <Label className="inline-flex items-center gap-2 text-sm font-semibold">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-300">
+            <Store className="h-3.5 w-3.5" />
+          </span>
+          Store
+        </Label>
+        <Select
+          value={form.watch("storeId")}
+          onValueChange={(value) => form.setValue("storeId", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select store" />
+          </SelectTrigger>
+          <SelectContent>
+            {stores.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
+                {s.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-2 md:col-span-2">
         <Label className="inline-flex items-center gap-2 text-sm font-semibold">
